@@ -244,7 +244,7 @@ body {
   outline: none;
   box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.25);
   background: rgba(255, 255, 255, 0.5) none;
-  border-radius: 0px 16px 0px 16px;
+  border-radius: 8px;
   transition: 0.4s;
 }
 
@@ -252,7 +252,7 @@ body {
 .searchBox .searchBar:focus {
   box-shadow: 0px 0px 16px rgba(0, 0, 0, 0.25);
   background-color: rgba(255, 255, 255, 0.75);
-  border-radius: 16px 0px 16px 0px;
+  border-radius: 8px;
 }
 
 

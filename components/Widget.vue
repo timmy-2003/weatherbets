@@ -105,7 +105,7 @@ export default {
 
 <style>
 #app {
-  background-image: url('../assets/img/app.jpg');
+  background-image: url('../assets/img/warm.jpg');
   background-size: cover;
   width: 100%;
   height: 100%;
@@ -201,13 +201,13 @@ main {
   outline: none; /* border around none*/
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.25); /*shadow around search bar*/
   background: rgba(255, 255, 255, 0.5) none; /*white transparent color of search bar*/
-  border-radius: 0 16px 0 16px;
+  border-radius: 8px;
   transition: 0.4s; /*time where it changes to other state*/
 }
 .search-box .search-bar:focus {
   box-shadow: 0 0 16px rgba(0, 0, 0, 0.25);
   background-color: rgba(255, 255, 255, 0.75);
-  border-radius: 16px 0 16px 0;
+  border-radius: 8px;
 }
 .location-box .location {
   color: #FFF;

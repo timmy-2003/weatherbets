@@ -6,14 +6,12 @@
 
 
           <v-card v-if="dataLoaded" id="card" class="mx-auto" outlined max-height="500" max-width="600"> <!-- show if the dataloaded=true -->
-            <v-card-title id="greetUser" class="justify-center">Hello {{ username }}!</v-card-title>
+            <v-card-title id="greetUser" class="justify-center">Hello {{ username }}!              <v-img v-if="dataLoaded" max-height="50" max-width="50" :src="imageSrc"></v-img>
+            </v-card-title>
             <v-card-text>
               <h3 class="text">Your weatherCoin balance: {{ weathercoin }}</h3>
               <h3 class="text">Level: {{userLevel}}</h3>
             </v-card-text>
-            <v-card-actions class="justify-center">
-              <v-img v-if="dataLoaded" max-height="70" max-width="70" :src="imageSrc"></v-img>
-            </v-card-actions>
             <v-text-field @keyup.enter="saveToDatabase" style="margin: 10px" dense outlined v-model="newUsername" v-if="showTextField" label="Enter new username"
                           append-icon="mdi-checkbox-marked-circle" @click:append="saveToDatabase"></v-text-field>
             <v-card-actions class="justify-center">
@@ -46,7 +44,6 @@
         </v-snackbar>
       </v-main>
     </div>
-    <footer-coin-price/>
   </v-app>
 </template>
 
@@ -100,7 +97,7 @@ export default {
     {
       const buff = Buffer.from(encryptedMessage, 'base64');
       encryptedMessage = buff.toString('utf8');
-      var decryptor = Crypto.createDecipheriv(encryptionMethod, secret,iv);
+      let decryptor = Crypto.createDecipheriv(encryptionMethod, secret,iv);
       return decryptor.update(encryptedMessage, 'base64','utf8') + decryptor.final('utf8');
     },
 
@@ -131,7 +128,7 @@ export default {
       });
     },
 
-    //evalute existing bets - saved on our database 'bets' collection
+    //evaluate existing bets - saved on our database 'bets' collection
     async evaluateBet(doc) {
       let betObj = (await doc).get('betObj'); //betting object
       //get objects
@@ -168,6 +165,8 @@ export default {
             let docRef = this.$fire.firestore.collection("/users").doc(this.$fire.auth.currentUser.uid);
             await docRef.update({weatherCoin: updatedWeatherCoins});  //update coins
             this.$noty.error("You lost " + tmpWeatherCoins*-1 + " weathercoins");
+            await this.delay(1500)
+            this.$noty.info("Actual temperature: " + this.actualTemp);
           }
         } else if (odds === 2){
           let tmpWeatherCoins = 0;
@@ -183,6 +182,8 @@ export default {
             let docRef = this.$fire.firestore.collection("/users").doc(this.$fire.auth.currentUser.uid);
             await docRef.update({weatherCoin: updatedWeatherCoins});  //update coins
             this.$noty.error("You lost " + tmpWeatherCoins*-1 + " weathercoins");
+            this.$noty.info("Actual temperature: " + this.actualTemp);
+
           }
         } else if (odds === 3){
           let tmpWeatherCoins = 0;
@@ -198,12 +199,19 @@ export default {
             let docRef = this.$fire.firestore.collection("/users").doc(this.$fire.auth.currentUser.uid);
             await docRef.update({weatherCoin: updatedWeatherCoins});  //update coins
             this.$noty.error("You lost " + tmpWeatherCoins*-1 + " weathercoins");
+            this.$noty.info("Actual temperature: " + this.actualTemp);
+
           }
         }
         await this.updateData(); // after evaluation refresh userdata(GET request)
+        await this.delay(3000)
         await this.deleteBets("You may now submit the next bet!")
 
       }
+    },
+
+    delay(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
     },
 
     //get location - location is query from database and get lat and lon from this
@@ -365,7 +373,7 @@ export default {
 }
 
 #app {
-  background-image: url('../assets/img/profile.jpg');
+  background-image: url('../assets/img/betting2.jpg');
   background-size: cover;
   background-repeat: no-repeat;
   background-attachment: fixed;
