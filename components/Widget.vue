@@ -61,7 +61,7 @@ export default {
     {
       const buff = Buffer.from(encryptedMessage, 'base64');
       encryptedMessage = buff.toString('utf8');
-      var decryptor = Crypto.createDecipheriv(encryptionMethod, secret,iv);
+      let decryptor = Crypto.createDecipheriv(encryptionMethod, secret,iv);
       return decryptor.update(encryptedMessage, 'base64','utf8') + decryptor.final('utf8');
     },
 

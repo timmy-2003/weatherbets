@@ -186,9 +186,9 @@ export default {
       url_base: 'http://api.creativehandles.com/getRandomColor',
     }
   },
-  /* get's instantly called*/
+  /* gets instantly called*/
   async created() {
-    var color;
+    let color;
     /* async -> script is downloaded in parallel to parsing the page, and executed as soon as it is available */
     if (this.$fire.auth.currentUser != null) { //if user is logged in get mintedweathercoins
       const docRef = this.$fire.firestore.collection('users'); //get the collection 'users' (user|weathercoin)
