@@ -76,7 +76,8 @@ app.post("/create/:id", async (req, res)=>{
   console.log(req.body)
   const document = {
     username: req.body.username,
-    weatherCoin: 10
+    weatherCoin: 10,
+    locations: []
   }
   try {
     await reference.set(document)

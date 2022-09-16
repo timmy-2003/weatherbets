@@ -5,7 +5,7 @@
       <v-main> <!-- Sizes your content based upon application components (dynamically sized based on the structure of layout elements)-->
 
 
-          <v-card v-if="dataLoaded" id="card" class="mx-auto" outlined max-height="500" max-width="600"> <!-- show if the dataloaded=true -->
+          <v-card v-if="dataLoaded" loader-height="1" loading id="card" class="mx-auto" outlined max-height="500" max-width="600"> <!-- show if the dataloaded=true -->
             <v-card-title id="greetUser" class="justify-center">Hello {{ username }}!              <v-img v-if="dataLoaded" max-height="50" max-width="50" :src="imageSrc"></v-img>
             </v-card-title>
             <v-card-text>
@@ -18,10 +18,10 @@
               <v-btn @click="getBetDocument">Evaluate my bets!</v-btn>
             </v-card-actions>
             <v-card-actions class="justify-center">
-              <v-btn @click="deleteBets('Successfully deleted your bet from database!')">Delete my bets</v-btn>
+              <v-btn @click="deleteBets('Deleted your bet from database!')">Delete current bet!</v-btn>
             </v-card-actions>
             <v-card-actions class="justify-center">
-              <v-btn v-if="!showTextField" class="buttons" @click="changeName">  <!-- show if textfield is not displayed -->
+              <v-btn v-if="!showTextField" class="buttons" @click="changeName">
                 Change username
               </v-btn>
               <v-btn class="buttons" @click="logoutUser" id="logoutButton">
@@ -50,6 +50,7 @@
 <script>
 import api from 'raw-loader!@/apiKeys.txt'; //gather the text from the textfile (server saved)
 const Crypto = require('crypto');
+import {arrayUnion} from "firebase/firestore"
 //console.log(api);
 export default {
 
@@ -159,6 +160,7 @@ export default {
             let updatedWeatherCoins = this.weathercoin + tmpWeatherCoins;
             await docRef.update({weatherCoin: updatedWeatherCoins});  //update coins
             this.$noty.success("You won " + tmpWeatherCoins + " weathercoins");
+            await this.pushToArray(docRef, location)
           } else {
             tmpWeatherCoins = bettedCoins * -1;
             let updatedWeatherCoins = this.weathercoin + tmpWeatherCoins;
@@ -176,6 +178,7 @@ export default {
             let updatedWeatherCoins = this.weathercoin + tmpWeatherCoins;
             await docRef.update({weatherCoin: updatedWeatherCoins});  //update coins
             this.$noty.success("You won " + tmpWeatherCoins + " weathercoins");
+            await this.pushToArray(docRef, location)
           } else {
             tmpWeatherCoins = bettedCoins * -1;
             let updatedWeatherCoins = this.weathercoin + tmpWeatherCoins;
@@ -193,6 +196,7 @@ export default {
             let updatedWeatherCoins = this.weathercoin + tmpWeatherCoins;
             await docRef.update({weatherCoin: updatedWeatherCoins});  //update coins
             this.$noty.success("You won " + tmpWeatherCoins + " weathercoins");
+            await this.pushToArray(docRef, location)
           } else {
             tmpWeatherCoins = bettedCoins * -1;
             let updatedWeatherCoins = this.weathercoin + tmpWeatherCoins;
@@ -212,6 +216,14 @@ export default {
 
     delay(ms) {
       return new Promise(resolve => setTimeout(resolve, ms));
+    },
+
+    async pushToArray(document, location){
+      await document.update(
+        {
+          locations: arrayUnion(location)
+        }
+      )
     },
 
     //get location - location is query from database and get lat and lon from this
@@ -237,6 +249,7 @@ export default {
           'Content-Type':'application/json'
         },
         body: JSON.stringify({
+          locations: [],
           username: "loser",
           weatherCoin: 10
         })

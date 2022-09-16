@@ -27,6 +27,9 @@
           <nuxt-link to="/Login" class="nuxt-link-active-underline">LOG IN</nuxt-link> <!-- link to login.vue -->
         </v-btn>
         <v-btn color="black" v-if="$fire.auth.currentUser != null">
+          <nuxt-link to="/maps" class="nuxt-link-active-underline">MAP</nuxt-link> <!-- link to profile.vue -->
+        </v-btn>
+        <v-btn color="black" v-if="$fire.auth.currentUser != null">
           <nuxt-link to="/Profile" class="nuxt-link-active-underline">PROFILE</nuxt-link> <!-- link to profile.vue -->
         </v-btn>
       </v-toolbar-items>
@@ -90,6 +93,7 @@ export default {
           {title: 'LEADERBOARDS', icon: 'mdi-chart-bar', link: 'leaderboards'},
           {title: 'WEATHERCOIN', icon: 'mdi-currency-btc', link: 'weathercoin'},
           {title: 'ABOUT US', icon: 'mdi-account-multiple', link: 'aboutus'},
+          {title: 'MAP', icon: "mdi-dice-6", link: 'maps'},
           {title: 'PROFILE', icon: "mdi-emoticon-cool", link: 'Profile'}
         ],
       }

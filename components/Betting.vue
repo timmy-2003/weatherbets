@@ -54,7 +54,7 @@
         </tbody>
       </v-simple-table>
 
-      <v-card v-if="showBetCard" class="mx-auto" max-width="400" max-height="1000" loading outlined shaped>
+      <v-card v-if="showBetCard" class="mx-auto" max-width="400" max-height="1000" loading loader-height="1" outlined shaped>
         <v-card-title primary-title class="justify-center">PLACE YOUR BET</v-card-title>
         <v-text-field id="txtFieldTemperature" class="txtField" v-model="predictedTemp" :rules="validateTemp"
                       label="temperature"></v-text-field>
@@ -162,7 +162,7 @@ export default {
           this.$noty.info("Please be a fair player and select a new city to bet!")
         });*/
       } else {
-        this.$noty.error("You have to less weathercoins!") //more cases why error is happened -> when we have backend
+        this.$noty.error("Error, please check!") //more cases why error is happened -> when we have backend
       }
     },
     //sleep function
@@ -195,7 +195,7 @@ export default {
   },
 
 
-  /* get's instantly called*/
+  /* gets instantly called*/
   async created() {
     await this.setApiKey();
     // get user data from document
@@ -293,28 +293,21 @@ h1:hover:after {
 
 
 .txtField {
-  margin-right: 100px; /* inner distance around txtField*/
-  margin-left: 100px; /* inner distance around txtField*/
+  margin-right: 100px;
+  margin-left: 100px;
   margin-bottom: 16px;
 }
 
 .bettingButtons {
-  margin-bottom: 12px; /*distance bottom from buttons (1x,2x,3x) */
-  margin-right: 0; /*distance from right from buttons (1x,2x,3x) */
+  margin-bottom: 12px;
+  margin-right: 0;
 }
 
 .mx-auto {
-  margin-top: 10px; /* overwrites it to 100 from weathercoin css*/
-  margin-bottom: 150px; /* overwrites it to 100 from weathercoin css*/
+  margin-top: 10px;
+  margin-bottom: 150px;
 }
 
-.mx-auto:hover {
-  box-shadow: 0 0 15px #ffffff; /*shadow around v-card*/
-}
-
-.table:hover {
-  box-shadow: 0 0 15px #ffffff; /*shadow around table*/
-}
 
 tr:hover {
   background-color: transparent !important; /* transparent if you hover over table entry color */
