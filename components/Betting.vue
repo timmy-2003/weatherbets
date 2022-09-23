@@ -1,8 +1,7 @@
 <template>
-  <!-- decide if widget pic should be warm or cold dependending on temperature-->
-  <div class="headline"> <!-- weathercoin div -->
+  <div class="headline">
     <h1>BETTING</h1>
-    <div :class="typeof weather.main != 'undefined'">  <!-- show if weather is NOT undefined -->
+    <div :class="typeof weather.main != 'undefined'">
 
       <div class="searchBox">
         <input
@@ -10,12 +9,12 @@
           class="searchBar"
           placeholder="Search..."
           v-model="query"
-          @keypress="fetchWeather"/>  <!-- if pressed then call fetchWeather-->
+          @keypress="fetchWeather"/>
       </div>
     </div>
 
-    <div class="weatherData" v-if="typeof weather.main != 'undefined'"> <!-- show if weather is NOT undefined -->
-      <v-simple-table style="background-color: #1e1e1e; border-radius: 10px" class="table" v-if="showData===true"> <!-- just show data if you had betted already!-->
+    <div class="weatherData" v-if="typeof weather.main != 'undefined'">
+      <v-simple-table style="background-color: #1e1e1e; border-radius: 10px" class="table" v-if="showData===true">
         <thead>
         <tr>
           <th style="text-align: center; font-size: 15px; color: white">City</th>
@@ -26,30 +25,18 @@
           <th style="text-align: center; font-size: 15px; color: orange">2x Odds Top</th>
           <th style="text-align: center; font-size: 15px; color: red">3x Odds Bottom</th>
           <th style="text-align: center; font-size: 15px; color: red">3x Odds Top</th>
-          <!--  <th style="text-align: center; font-size: 15px; color: white">Deadline</th>  date where it calculates -->
         </tr>
         </thead>
         <tbody>
         <tr>
-          <td class="td">{{ weather.name }}</td>  <!-- fixed data from API-->
-          <td class="td">{{ weather.main.temp }}° C</td>  <!-- fixed data from API-->
-
+          <td class="td">{{ weather.name }}</td>
+          <td class="td">{{ weather.main.temp }}° C</td>
           <td class="td">{{ parseFloat(weather.main.temp - 1.5).toFixed(2) }}° C</td>
-          <!-- predicted data -° (round to two decimals)-->
           <td class="td">{{ parseFloat(weather.main.temp + 1.5).toFixed(2) }}° C</td>
-          <!-- predicted data +° (round to two decimals)-->
-
           <td class="td">{{ parseFloat(weather.main.temp - 1).toFixed(2) }}° C</td>
-          <!-- predicted data -° (round to two decimals)-->
           <td class="td">{{ parseFloat(weather.main.temp + 1).toFixed(2) }}° C</td>
-          <!-- predicted data +° (round to two decimals)-->
-
           <td class="td">{{ parseFloat(weather.main.temp - 0.5).toFixed(2) }}° C</td>
-          <!-- predicted data -° (round to two decimals)-->
           <td class="td">{{ parseFloat(weather.main.temp + 0.5).toFixed(2) }}° C</td>
-          <!-- predicted data +° (round to two decimals)-->
-
-          <!--  <td class="td">{{ dateBuilderModified() }}</td> deadline where we evaluate -->
         </tr>
         </tbody>
       </v-simple-table>
@@ -75,25 +62,26 @@
 </template>
 
 <script>
-import api from 'raw-loader!@/apiKeys.txt'; //gather the text from the textfile (server saved)
+import api from 'raw-loader!@/apiKeys.txt';
 const Crypto = require('crypto');
 
 export default {
   data: () => ({
     weathercoin: 0,
+    existingBets: [],
     api_key: '',
     url_base: 'https://api.openweathermap.org/data/2.5/',
     query: '',
     weather: {},
-    actualTemp: null,   // actualTemp fetched by the API
-    predictedTemp: null, //predictedTemp by the user input
-    bettedCoins: null, // later insert document.getElementById('txtFieldAmount').value
+    actualTemp: null,
+    predictedTemp: null,
+    bettedCoins: null,
     showData: false,
     showBetCard: false,
-    //encryption/decyption
-    encryptionMethod: 'AES-256-CBC', //symmetrical method of encrypting data, which is one of the most widely used and at the same time most secure methods of encryption today
-    key: Crypto.createHash('sha512').update('fd85b494-aaaa', 'utf8').digest('hex').substr(0,32), //key file must only on the corresponding data file
-    iv:  Crypto.createHash('sha512').update('smslt', 'utf8').digest('hex').substr(0,16), // initialization vector (IV)
+
+    encryptionMethod: 'AES-256-CBC',
+    key: Crypto.createHash('sha512').update('fd85b494-aaaa', 'utf8').digest('hex').substr(0,32),
+    iv:  Crypto.createHash('sha512').update('smslt', 'utf8').digest('hex').substr(0,16),
 
     validateTemp: [
       (v) => !!v || "required field",
@@ -114,16 +102,16 @@ export default {
     },
 
     async setApiKey() {
-      const apiArray = api.split(/\r?\n|\r|\n/g); //split in our case linebreak
-      this.api_key=apiArray[0]; //set API key from txt document
-      this.api_key = this.decryptAPIKey(this.api_key, this.encryptionMethod, this.key, this.iv); //overwrite encrypted API key via decryption method
+      const apiArray = api.split(/\r?\n|\r|\n/g);
+      this.api_key=apiArray[0];
+      this.api_key = this.decryptAPIKey(this.api_key, this.encryptionMethod, this.key, this.iv);
     },
 
     fetchWeather(e) {
       if (e.key === "Enter") {
-        fetch(`${this.url_base}weather?q=${this.query}&units=metric&APPID=${this.api_key}`) //fetch the weather if the key enter is pressed
-          .then(res => { //if the request was successful go further with then
-            if (res.statusText === 'Not Found') { //get response in .json and deserialize to use it and then save it to this.weather
+        fetch(`${this.url_base}weather?q=${this.query}&units=metric&APPID=${this.api_key}`)
+          .then(res => {
+            if (res.statusText === 'Not Found') {
               this.$noty.error("Please enter a valid city!")
             }
             return res.json();
@@ -131,11 +119,11 @@ export default {
       }
     },
     setResults(results) {
-      this.weather = results; // write results into variable
-      this.showData = false; // if we fetch new data, data should not be visible
+      this.weather = results;
+      this.showData = false;
       this.showBetCard = true;
     },
-    dateBuilderModified() { /*modified to date we want to predict */
+    dateBuilderModified() {
       let d = new Date();
       let months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
       let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -149,48 +137,51 @@ export default {
       if (document.getElementById('txtFieldAmount').value >= 1 && document.getElementById('txtFieldAmount').value <= this.weathercoin &&
         document.getElementById('txtFieldAmount').value !== "") {
         if (this.predictedTemp == null) {
-          this.predictedTemp = 0; //if no temp is entered then set it to zero
+          this.predictedTemp = 0;
         }
         else {
-          this.predictedTemp = this.predictedTemp.replace(',', '.'); //replace , to .
+          this.predictedTemp = this.predictedTemp.replace(',', '.');
         }
-        this.actualTemp = this.weather.main.temp; // get actual temperature and write it into the variable
-        this.bet(odds); //--> determine which button was pressed (1.5 OR 2 OR 3) with 'odds' var
-
-        // show message
-        /*this.delay(2000).then(() => {
-          this.$noty.info("Please be a fair player and select a new city to bet!")
-        });*/
+        this.actualTemp = this.weather.main.temp;
+        this.bet(odds);
       } else {
-        this.$noty.error("Error, please check!") //more cases why error is happened -> when we have backend
+        this.$noty.error("Error, please check!");
       }
     },
-    //sleep function
+
     delay(ms) {
       return new Promise(resolve => setTimeout(resolve, ms));
     },
 
-    // the betting logic
     async bet(odds) {
       let timestamp = new Date(document.getElementById("timePicker").value);
       if (timestamp <= Date.now()){
         this.$noty.error("Please select a date in the future!");
         return 0
       }
-      let doc = {
-        betObj: {
-          bettedCoins: parseFloat(this.bettedCoins),
-          predictedTemp: parseFloat(this.predictedTemp),
-          location: this.query,
-          odds: odds,
-          time: timestamp
-        }
+
+      let betObj =  {
+        bettedCoins: parseFloat(this.bettedCoins),
+        predictedTemp: parseFloat(this.predictedTemp),
+        location: this.query,
+        odds: odds,
+        time: timestamp
       }
-      let docRef = this.$fire.firestore.collection("/bets").doc(this.$fire.auth.currentUser.uid)
-      await docRef.set(doc, {merge: false})//update values in firebase trought firebase, when we do new bet
-      this.$noty.success("Bet placed!");
-      this.showData = true; //show the results in the table
-      this.showBetCard = false;
+
+        this.existingBets.push(betObj)
+
+        let doc = {
+          bets: this.existingBets
+        }
+
+        let docRef = this.$fire.firestore.collection("/bets").doc(this.$fire.auth.currentUser.uid)
+        await docRef.set(doc, {merge: false})
+        this.$noty.success("Bet placed!");
+        this.showData = true;
+        this.showBetCard = false;
+
+
+
     }
   },
 
@@ -198,10 +189,19 @@ export default {
   /* gets instantly called*/
   async created() {
     await this.setApiKey();
-    // get user data from document
-    const ref = this.$fire.firestore.collection('users').doc(this.$fire.auth.currentUser.uid); //get the collection from database
+    const ref = this.$fire.firestore.collection('users').doc(this.$fire.auth.currentUser.uid);
     let document = ref.get();
-    this.weathercoin = (await document).get("weatherCoin");  //get the weathercoins
+    this.weathercoin = (await document).data().weatherCoin;
+    let docRef = this.$fire.firestore.collection("/bets").doc(this.$fire.auth.currentUser.uid);
+    docRef.get().then(async (doc) => {
+      if (doc.exists) {
+        this.existingBets = doc.data().bets;
+      } else {
+        console.log("No bets found for this user");
+      }
+    }).catch((error) => {
+      console.log("Error getting document:", error);
+    });
   }
 
 
@@ -221,7 +221,7 @@ body {
 }
 
 .headline {
-  margin-top: 100px; /* distance from top of div*/
+  margin-top: 100px;
   text-align: center;
 }
 
@@ -281,14 +281,14 @@ h1:after {
 }
 
 h1:hover:after {
-  width: 100%; /* full text get's the effect*/
-  left: 0; /* begin left at text*/
+  width: 100%;
+  left: 0;
 }
 
 .weatherData {
-  margin-top: 60px; /* distance from top */
-  width: 80%; /*so that it isn't too long*/
-  transform: translate(12.5%, 0%); /* make it into the middle*/
+  margin-top: 60px;
+  width: 80%;
+  transform: translate(12.5%, 0%);
 }
 
 
@@ -310,7 +310,7 @@ h1:hover:after {
 
 
 tr:hover {
-  background-color: transparent !important; /* transparent if you hover over table entry color */
+  background-color: transparent !important;
 }
 
 </style>

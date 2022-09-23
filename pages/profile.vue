@@ -18,9 +18,6 @@
               <v-btn @click="getBetDocument">Evaluate my bets!</v-btn>
             </v-card-actions>
             <v-card-actions class="justify-center">
-              <v-btn @click="deleteBets('Deleted your bet from database!')">Delete current bet!</v-btn>
-            </v-card-actions>
-            <v-card-actions class="justify-center">
               <v-btn v-if="!showTextField" class="buttons" @click="changeName">
                 Change username
               </v-btn>
@@ -34,10 +31,10 @@
           </v-card>
 
 
-        <v-snackbar timeout="2500" id="snackbar" v-model="showSnackBar">
-          {{ msg }}
+        <v-snackbar color="success" timeout="1500" id="snackbar" v-model="showSnackBar">
+          <div style="color: black">{{ msg }}</div>
           <template v-slot:action="{ attrs }"> <!-- so that the button is at the same line as error message -->
-            <v-btn dark text v-bind="attrs" @click="showSnackBar = false">
+            <v-btn style="color: black" dark text v-bind="attrs" @click="showSnackBar = false">
               Close
             </v-btn>
           </template>
@@ -51,7 +48,6 @@
 import api from 'raw-loader!@/apiKeys.txt'; //gather the text from the textfile (server saved)
 const Crypto = require('crypto');
 import {arrayUnion} from "firebase/firestore"
-//console.log(api);
 export default {
 
   name: "profile",
@@ -59,6 +55,7 @@ export default {
   data() {  //Data is the private memory of each component where you can store any variables you need
     return {
       username: "",
+      numOfBets: null,
       weathercoin: 0,
       showTextField: false,
       newUsername: "",
@@ -77,23 +74,10 @@ export default {
       encryptionMethod: 'AES-256-CBC', //symmetrical method of encrypting data, which is one of the most widely used and at the same time most secure methods of encryption today
       key: Crypto.createHash('sha512').update('fd85b494-aaaa', 'utf8').digest('hex').substr(0,32), //key file must only on the corresponding data file
       iv:  Crypto.createHash('sha512').update('smslt', 'utf8').digest('hex').substr(0,16), // initialization vector (IV)
-
     }
   },
 
   methods: {
-    /* delete all the bets from the user*/
-    async deleteBets(notification){
-      await fetch("/api/delete/" + this.$fire.auth.currentUser.uid, {
-        method: 'DELETE'
-      }).then(res => {  //starts a request and returns a promise
-        if (res.ok){
-          this.$noty.success(notification)
-        }
-      })
-
-    },
-
     decryptAPIKey(encryptedMessage, encryptionMethod, secret, iv)
     {
       const buff = Buffer.from(encryptedMessage, 'base64');
@@ -119,10 +103,8 @@ export default {
         if (doc.exists) {
           await this.evaluateBet(doc)  //if a bet is saved in the database then evaluate
         } else {
-          //error messages
-          console.log("No bets found for this user");
           this.showSnackBar = true;
-          this.msg = "No bet found! Start by making a bet!"
+          this.msg = "No bets found. Start placing some bets!"
         }
       }).catch((error) => {
         console.log("Error getting document:", error);
@@ -131,87 +113,106 @@ export default {
 
     //evaluate existing bets - saved on our database 'bets' collection
     async evaluateBet(doc) {
-      let betObj = (await doc).get('betObj'); //betting object
-      //get objects
-      let bettedCoins = betObj.bettedCoins;
-      let location = betObj.location;
-      let odds = betObj.odds;
-      let predictedTemp = betObj.predictedTemp;
-      let time = betObj.time;
-      time = time.seconds;
-      if (time > Date.now()/1000){ //if time is in the future show data
+      let futureCounter = 0;
+      let betArray = doc.data().bets;
+      if (betArray.length === 0){
         this.showSnackBar = true;
-        this.msg = "Bet date is in the future!"
-      } else {
-        let coordinates = await this.locationToGeocode(location) //get coordinates
-        let url = this.base_url_weather + coordinates + "&dt=" + time + "&units=metric&appid=" + this.api_key_weather;
-        console.log(url) // the url to fetch the weather
-        await fetch(url)
-          .then(res => res.json()) //if the request was successful go further with then and get response in .json and deserialize to use it -> we want color
-          .then(res => {
-            this.actualTemp = res.data[0].temp; //get the actual temp form the API fetch
-          })
-
-        if (odds === 1.5){
-          let tmpWeatherCoins = 0;
-          if (this.actualTemp - 1.5 <= predictedTemp && this.actualTemp + 1.5 >= predictedTemp){ //if the bet lies between the win
-            tmpWeatherCoins = bettedCoins * 1.5
-            let docRef = this.$fire.firestore.collection("/users").doc(this.$fire.auth.currentUser.uid);
-            let updatedWeatherCoins = this.weathercoin + tmpWeatherCoins;
-            await docRef.update({weatherCoin: updatedWeatherCoins});  //update coins
-            this.$noty.success("You won " + tmpWeatherCoins + " weathercoins");
-            await this.pushToArray(docRef, location)
-          } else {
-            tmpWeatherCoins = bettedCoins * -1;
-            let updatedWeatherCoins = this.weathercoin + tmpWeatherCoins;
-            let docRef = this.$fire.firestore.collection("/users").doc(this.$fire.auth.currentUser.uid);
-            await docRef.update({weatherCoin: updatedWeatherCoins});  //update coins
-            this.$noty.error("You lost " + tmpWeatherCoins*-1 + " weathercoins");
-            await this.delay(1500)
-            this.$noty.info("Actual temperature: " + this.actualTemp);
-          }
-        } else if (odds === 2){
-          let tmpWeatherCoins = 0;
-          if (this.actualTemp - 1 <= predictedTemp && this.actualTemp + 1 >= predictedTemp){ //if the bet lies between the win
-            tmpWeatherCoins = bettedCoins * 2
-            let docRef = this.$fire.firestore.collection("/users").doc(this.$fire.auth.currentUser.uid);
-            let updatedWeatherCoins = this.weathercoin + tmpWeatherCoins;
-            await docRef.update({weatherCoin: updatedWeatherCoins});  //update coins
-            this.$noty.success("You won " + tmpWeatherCoins + " weathercoins");
-            await this.pushToArray(docRef, location)
-          } else {
-            tmpWeatherCoins = bettedCoins * -1;
-            let updatedWeatherCoins = this.weathercoin + tmpWeatherCoins;
-            let docRef = this.$fire.firestore.collection("/users").doc(this.$fire.auth.currentUser.uid);
-            await docRef.update({weatherCoin: updatedWeatherCoins});  //update coins
-            this.$noty.error("You lost " + tmpWeatherCoins*-1 + " weathercoins");
-            this.$noty.info("Actual temperature: " + this.actualTemp);
-
-          }
-        } else if (odds === 3){
-          let tmpWeatherCoins = 0;
-          if (this.actualTemp - 0.5 <= predictedTemp && this.actualTemp + 0.5 >= predictedTemp){ //if the bet lies between the win
-            tmpWeatherCoins = bettedCoins * 3
-            let docRef = this.$fire.firestore.collection("/users").doc(this.$fire.auth.currentUser.uid);
-            let updatedWeatherCoins = this.weathercoin + tmpWeatherCoins;
-            await docRef.update({weatherCoin: updatedWeatherCoins});  //update coins
-            this.$noty.success("You won " + tmpWeatherCoins + " weathercoins");
-            await this.pushToArray(docRef, location)
-          } else {
-            tmpWeatherCoins = bettedCoins * -1;
-            let updatedWeatherCoins = this.weathercoin + tmpWeatherCoins;
-            let docRef = this.$fire.firestore.collection("/users").doc(this.$fire.auth.currentUser.uid);
-            await docRef.update({weatherCoin: updatedWeatherCoins});  //update coins
-            this.$noty.error("You lost " + tmpWeatherCoins*-1 + " weathercoins");
-            this.$noty.info("Actual temperature: " + this.actualTemp);
-
-          }
-        }
-        await this.updateData(); // after evaluation refresh userdata(GET request)
-        await this.delay(3000)
-        await this.deleteBets("You may now submit the next bet!")
-
+        this.msg = "No bets found. Start placing some bets!"
       }
+      let indexArray = [];
+      //get objects
+      for (let i = 0; i < betArray.length; i++) {
+        let bettedCoins = betArray[i].bettedCoins;
+        let location = betArray[i].location;
+        let odds = betArray[i].odds;
+        let predictedTemp = betArray[i].predictedTemp;
+        let time = betArray[i].time.seconds;
+        if (time > Date.now()/1000){
+          futureCounter++;
+        } else {
+          let coordinates = await this.locationToGeocode(location) //get coordinates
+          let url = this.base_url_weather + coordinates + "&dt=" + time + "&units=metric&appid=" + this.api_key_weather;
+          await fetch(url)
+            .then(res => res.json()) //if the request was successful go further with then and get response in .json and deserialize to use it -> we want color
+            .then(res => {
+              this.actualTemp = res.data[0].temp; //get the actual temp form the API fetch
+            })
+
+          if (odds === 1.5){
+            let tmpWeatherCoins = 0;
+            if (this.actualTemp - 1.5 <= predictedTemp && this.actualTemp + 1.5 >= predictedTemp){ //if the bet lies between the win
+              tmpWeatherCoins = bettedCoins * 1.5
+              let docRef = this.$fire.firestore.collection("/users").doc(this.$fire.auth.currentUser.uid);
+              let updatedWeatherCoins = this.weathercoin + tmpWeatherCoins;
+              await docRef.update({weatherCoin: updatedWeatherCoins});  //update coins
+              this.$noty.success("You won " + tmpWeatherCoins + " weathercoins");
+              await this.pushToArray(docRef, location)
+            } else {
+              tmpWeatherCoins = bettedCoins * -1;
+              let updatedWeatherCoins = this.weathercoin + tmpWeatherCoins;
+              let docRef = this.$fire.firestore.collection("/users").doc(this.$fire.auth.currentUser.uid);
+              await docRef.update({weatherCoin: updatedWeatherCoins});  //update coins
+              this.$noty.error("You lost " + tmpWeatherCoins*-1 + " weathercoins");
+              await this.delay(1500)
+              this.$noty.info("Actual temperature in " + location + ": " + this.actualTemp);
+            }
+            indexArray.push(i)
+
+          } else if (odds === 2){
+            let tmpWeatherCoins = 0;
+            if (this.actualTemp - 1 <= predictedTemp && this.actualTemp + 1 >= predictedTemp){ //if the bet lies between the win
+              tmpWeatherCoins = bettedCoins * 2
+              let docRef = this.$fire.firestore.collection("/users").doc(this.$fire.auth.currentUser.uid);
+              let updatedWeatherCoins = this.weathercoin + tmpWeatherCoins;
+              await docRef.update({weatherCoin: updatedWeatherCoins});  //update coins
+              this.$noty.success("You won " + tmpWeatherCoins + " weathercoins");
+              await this.pushToArray(docRef, location)
+            } else {
+              tmpWeatherCoins = bettedCoins * -1;
+              let updatedWeatherCoins = this.weathercoin + tmpWeatherCoins;
+              let docRef = this.$fire.firestore.collection("/users").doc(this.$fire.auth.currentUser.uid);
+              await docRef.update({weatherCoin: updatedWeatherCoins});  //update coins
+              this.$noty.error("You lost " + tmpWeatherCoins*-1 + " weathercoin");
+              this.$noty.info("Actual temperature: " + this.actualTemp);
+            }
+            indexArray.push(i)
+          } else if (odds === 3){
+            let tmpWeatherCoins = 0;
+            if (this.actualTemp - 0.5 <= predictedTemp && this.actualTemp + 0.5 >= predictedTemp){ //if the bet lies between the win
+              tmpWeatherCoins = bettedCoins * 3
+              let docRef = this.$fire.firestore.collection("/users").doc(this.$fire.auth.currentUser.uid);
+              let updatedWeatherCoins = this.weathercoin + tmpWeatherCoins;
+              await docRef.update({weatherCoin: updatedWeatherCoins});  //update coins
+              this.$noty.success("You won " + tmpWeatherCoins + " weathercoin");
+              await this.pushToArray(docRef, location)
+            } else {
+              tmpWeatherCoins = bettedCoins * -1;
+              let updatedWeatherCoins = this.weathercoin + tmpWeatherCoins;
+              let docRef = this.$fire.firestore.collection("/users").doc(this.$fire.auth.currentUser.uid);
+              await docRef.update({weatherCoin: updatedWeatherCoins});
+              this.$noty.error("You lost " + tmpWeatherCoins*-1 + " weathercoin");
+              this.$noty.info("Actual temperature: " + this.actualTemp);
+            }
+            indexArray.push(i)
+          }
+          await this.updateData(); // after evaluation refresh userdata(GET request)
+          await this.delay(1000)
+        }
+      }
+      this.deleteBets(betArray, indexArray)
+      if (futureCounter !== 0){
+        this.$noty.success(futureCounter + " bet(s) still in the future!")
+      }
+    },
+
+     deleteBets(arr, indexArray){
+      const docRef = this.$fire.firestore.collection("bets").doc(this.$fire.auth.currentUser.uid);
+      indexArray.sort();
+       for (let i = indexArray.length -1; i >= 0; i--) // iterate through array in reverse order, so we don't mess up the indexes of the yet-to be removed items
+         arr.splice(indexArray[i],1);
+      docRef.set({
+        bets: arr
+      }, {merge:false})
     },
 
     delay(ms) {
@@ -235,14 +236,11 @@ export default {
         .then(res => {
           lat = res[0].lat
           lon = res[0].lon
-          console.log(lat)
-          console.log(lon)
         })
       return "lat=" + lat + "&lon=" + lon;
     },
 
     async loser(){
-      console.log("put request")
       await fetch("/api/lose/" + this.$fire.auth.currentUser.uid, {
         method: 'PUT',
         headers:{
@@ -346,14 +344,29 @@ export default {
       method: 'GET',
       cache: 'default'
     })
+
     .then(res => res.json())
     .then(data => jsonDoc = data)
     this.username = jsonDoc.username; //get back the username
     this.weathercoin = jsonDoc.weathercoin; //get back the weathercoins
-    //this.time = jsonDoc.time;
-    //this.time = new Date(this.time.seconds * 1000 + this.time.nanoseconds/1000000) get from firebase date to actual date readable
     this.setBadge(); //method call setBadge to user according weathercoins
-    this.dataLoaded = true;//set var to true
+    let docRef = this.$fire.firestore.collection("/bets").doc(this.$fire.auth.currentUser.uid); //get collection from database 'bets'
+    docRef.get().then(async (doc) => {
+      if (doc.exists) {
+        this.numOfBets = (await doc).data().bets.length;
+        if (this.numOfBets === 0){
+          this.showSnackBar = true;
+          this.msg = "No bets found. Start placing some bets!"
+        }
+      } else {
+        this.showSnackBar = true;
+        this.msg = "No bets found. Start placing some bets!"
+      }
+    }).catch((error) => {
+      console.log("Error getting document:", error);
+    });
+
+    this.dataLoaded = true;
   },
 
 
