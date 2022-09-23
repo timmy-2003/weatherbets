@@ -4,8 +4,14 @@
     <nav-bar/>
     <div class="content">
       <h1>LEADERBOARDS</h1>
-      <score-table id="table"></score-table> <!-- the actual leaderboard get component-->
+      <v-tabs id="tabs">
+          <v-tab @click="lbType=1">WeatherCoin</v-tab>
+          <v-tab @click="lbType=2">Locations</v-tab>
+      </v-tabs>
     </div>
+     <score-table v-if="lbType === 1" class="table"></score-table>
+    <location-score-table class="table" v-if="lbType === 2"></location-score-table>
+
     <Footer/>
   </v-app>
 
@@ -21,22 +27,46 @@
   background-attachment: fixed;
   background-position: center;
 }
-#table {
-  position: fixed; /*positioned relative to the viewport, it always stays in the same place even if the page is scrolled */
-  top: 50%; /* mid of screen */
-  left: 50%; /*mid of screen*/
-  transform: translate(-50%, -30%);  /*mid of screen*/
+.table {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -30%);
   border-radius: 5px;
-  width: 30%;
+  width: 25%;
 }
+
+
+
 .content{
   margin-top: 100px; /* distance from top for content*/
   text-align: center;
 }
-/* responsiveness */
+
+#tabs{
+  width: min-content;
+  position: fixed;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -30%);
+  border-radius: 5px;
+}
+
 @media (max-width: 800px) {
-  #table {
-    width: 70%;
+  .table{
+    width: 80%;
   }
 }
 </style>
+<script>
+
+export default {
+
+  data(){
+    return{
+      lbType: 1
+
+    }
+  }
+}
+</script>

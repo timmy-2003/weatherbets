@@ -31,13 +31,31 @@ app.get("/userdata/:id", async (req, res)=>{
   res.json({"username":username, "weathercoin":weathercoin}).status(200)
 })
 
+app.get("/leaderboard/locations", async (req, res)=>{
+  let arr = [];
+  const documents = db.collection('users');
+  const snapshot = await documents.get();
+  let i = 0;
+  snapshot.forEach(doc => {
+    arr[i] = doc.data();
+    i++;
+  });
+  arr.sort(compareArrLength);
+  for (let i = arr.length; i>5; i--)
+  {
+    arr.pop();
+  }
+  res.send(arr);
+  res.status(200);
+})
+
 
 /*
 GET: safe, idempotent (we do not change something on the server || same request gives same response back)
 we get the whole users collection and then sort the usernames according to their weathercoins
 status 200 -> OK
  */
-app.get("/leaderboard", async (req, res)=>{
+app.get("/leaderboard/weathercoin", async (req, res)=>{
   let userArray = [];
   const documents = db.collection('users');
   const snapshot = await documents.get();
@@ -142,6 +160,19 @@ function compareScores(a, b) {
     return -1;
   }
   return 0; //same score
+}
+
+function compareArrLength(a, b) {
+  let arrLengthA = a.locations.length;
+  let arrLengthB = b.locations.length;
+
+  if (arrLengthA < arrLengthB) {
+    return 1;
+  }
+  if (arrLengthA > arrLengthB) {
+    return -1;
+  }
+  return 0;
 }
 
 

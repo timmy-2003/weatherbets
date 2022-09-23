@@ -5,7 +5,7 @@
       <v-main> <!-- Sizes your content based upon application components (dynamically sized based on the structure of layout elements)-->
 
 
-          <v-card v-if="dataLoaded" loader-height="1" loading id="card" class="mx-auto" outlined max-height="500" max-width="600"> <!-- show if the dataloaded=true -->
+          <v-card v-if="dataLoaded" id="card" class="mx-auto" outlined max-height="500" max-width="600"> <!-- show if the dataloaded=true -->
             <v-card-title id="greetUser" class="justify-center">Hello {{ username }}!              <v-img v-if="dataLoaded" max-height="50" max-width="50" :src="imageSrc"></v-img>
             </v-card-title>
             <v-card-text>
@@ -18,7 +18,7 @@
               <v-btn @click="getBetDocument">Evaluate my bets!</v-btn>
             </v-card-actions>
             <v-card-actions class="justify-center">
-              <v-btn @click="deleteAllBets('Successfully deleted your bet from database!')">Delete my bets</v-btn>
+              <v-btn @click="deleteAllBets('Successfully deleted your bets from database!')">Delete my bets</v-btn>
             </v-card-actions>
             <v-card-actions class="justify-center">
               <v-btn v-if="!showTextField" class="buttons" @click="changeName">

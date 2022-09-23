@@ -1,6 +1,6 @@
 <template>
 
-  <v-simple-table style="background-color: #1e1e1e; border-radius: 10px" class="table" v-if="userArray.length"> <!-- display if data is in userArray -->
+  <v-simple-table style="background-color: rgba(30,28,28,0.8); border-radius: 10px" class="table" v-if="userArray.length"> <!-- display if data is in userArray -->
     <thead> <!-- group header content in an HTML table -->
     <tr> <!-- row -->
       <th style="text-align: center; font-size: 15px; color: white">Username</th> <!-- cell -->
@@ -9,9 +9,10 @@
     </thead>
     <tbody>
     <tr v-for="user in userArray">
+    <tr v-for="user in userArray">
       <!-- get's username and according weathercoin from array -->
-      <td class="td">{{ user.username }}</td>
-      <td class="td">{{ user.weatherCoin }}</td>
+      <td class="tableData">{{ user.username }}</td>
+      <td class="tableData">{{ user.weatherCoin }}</td>
     </tr>
     </tbody>
   </v-simple-table>
@@ -26,9 +27,8 @@ export default {
       userArray: [],
     }
   },
-  /* get's instantly called*/
   async created() {
-    fetch("/api/leaderboard", {
+    fetch("/api/leaderboard/weathercoin", {
       method: 'GET',
       cache: 'default'
     }).then(res => {
@@ -44,10 +44,8 @@ export default {
 </script>
 
 <style scoped> /* scoped = apply to elements of the current component only */
-.table:hover {
-  box-shadow: 0 0 15px #ffffff; /*shadow around table*/
+.tableData{
+  text-align: center;
 }
-tr:hover {
-  background-color: #262626 !important; /* hover over table entry color */
-}
+
 </style>
