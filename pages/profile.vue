@@ -18,6 +18,9 @@
               <v-btn @click="getBetDocument">Evaluate my bets!</v-btn>
             </v-card-actions>
             <v-card-actions class="justify-center">
+              <v-btn @click="deleteAllBets('Successfully deleted your bet from database!')">Delete my bets</v-btn>
+            </v-card-actions>
+            <v-card-actions class="justify-center">
               <v-btn v-if="!showTextField" class="buttons" @click="changeName">
                 Change username
               </v-btn>
@@ -78,6 +81,16 @@ export default {
   },
 
   methods: {
+    async deleteAllBets(notification){
+      await fetch("/api/delete/" + this.$fire.auth.currentUser.uid, {
+        method: 'DELETE'
+      }).then(res => {
+        if (res.ok){
+          this.$noty.success(notification)
+        }
+      })
+    },
+
     decryptAPIKey(encryptedMessage, encryptionMethod, secret, iv)
     {
       const buff = Buffer.from(encryptedMessage, 'base64');
