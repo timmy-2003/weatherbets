@@ -13,40 +13,12 @@
       </div>
     </div>
 
-    <div class="weatherData" v-if="typeof weather.main != 'undefined'">
-      <v-simple-table style="background-color: #1e1e1e; border-radius: 10px" class="table" v-if="showData===true">
-        <thead>
-        <tr>
-          <th style="text-align: center; font-size: 15px; color: white">City</th>
-          <th style="text-align: center; font-size: 15px; color: white">Degrees</th>
-          <th style="text-align: center; font-size: 15px; color: green">1,5x Odds Bottom</th>
-          <th style="text-align: center; font-size: 15px; color: green">1,5x Odds Top</th>
-          <th style="text-align: center; font-size: 15px; color: orange">2x Odds Bottom</th>
-          <th style="text-align: center; font-size: 15px; color: orange">2x Odds Top</th>
-          <th style="text-align: center; font-size: 15px; color: red">3x Odds Bottom</th>
-          <th style="text-align: center; font-size: 15px; color: red">3x Odds Top</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-          <td class="td">{{ weather.name }}</td>
-          <td class="td">{{ weather.main.temp }}° C</td>
-          <td class="td">{{ parseFloat(weather.main.temp - 1.5).toFixed(2) }}° C</td>
-          <td class="td">{{ parseFloat(weather.main.temp + 1.5).toFixed(2) }}° C</td>
-          <td class="td">{{ parseFloat(weather.main.temp - 1).toFixed(2) }}° C</td>
-          <td class="td">{{ parseFloat(weather.main.temp + 1).toFixed(2) }}° C</td>
-          <td class="td">{{ parseFloat(weather.main.temp - 0.5).toFixed(2) }}° C</td>
-          <td class="td">{{ parseFloat(weather.main.temp + 0.5).toFixed(2) }}° C</td>
-        </tr>
-        </tbody>
-      </v-simple-table>
-
       <v-card v-if="showBetCard" class="mx-auto" max-width="400" max-height="1000" loading loader-height="1" outlined shaped>
         <v-card-title primary-title class="justify-center">PLACE YOUR BET</v-card-title>
         <v-text-field id="txtFieldTemperature" class="txtField" v-model="predictedTemp" :rules="validateTemp"
                       label="temperature"></v-text-field>
         <v-text-field id="txtFieldAmount" class="txtField" v-model="bettedCoins" :rules="validateCoins"
-                      label="weathercoins"></v-text-field>
+                      label="weathercoin"></v-text-field>
         <input id="timePicker" style="color: white; font-size: 18px; background-color: #364848; border-radius: 4px"
                type="datetime-local" max="2022-12-31T00:00" value="2022-09-01T00:00">
         <v-card-actions class="justify-center">
@@ -58,7 +30,6 @@
 
 
     </div>
-  </div>
 </template>
 
 <script>

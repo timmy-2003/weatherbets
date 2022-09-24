@@ -56,7 +56,7 @@
           </v-card>
 
 
-        <v-snackbar color="success" timeout="1500" id="snackbar" v-model="showSnackBar">
+        <v-snackbar color="green" timeout="1500" v-model="showSnackBar">
           <div style="color: black">{{ msg }}</div>
           <template v-slot:action="{ attrs }"> <!-- so that the button is at the same line as error message -->
             <v-btn style="color: black" dark text v-bind="attrs" @click="showSnackBar = false">
@@ -81,7 +81,6 @@ export default {
     return {
       username: "",
       numOfBets: null,
-      notifyDelete: "Successfully deleted your bets!",
       weathercoin: 0,
       showTextField: false,
       newUsername: "",
@@ -103,14 +102,16 @@ export default {
     }
   },
 
+
   methods: {
-    async deleteAllBets(notification){
+    async deleteAllBets(){
       this.dialog = false;
       await fetch("/api/delete/" + this.$fire.auth.currentUser.uid, {
         method: 'DELETE'
       }).then(res => {
         if (res.ok){
-          this.$noty.success(notification)
+          this.showSnackBar = true;
+          this.msg = "Successfully deleted your bets!"
         }
       })
     },
