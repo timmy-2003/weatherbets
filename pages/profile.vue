@@ -17,9 +17,31 @@
             <v-card-actions class="justify-center">
               <v-btn @click="getBetDocument">Evaluate my bets!</v-btn>
             </v-card-actions>
-            <v-card-actions class="justify-center">
-              <v-btn @click="deleteAllBets('Successfully deleted your bets from database!')">Delete my bets</v-btn>
-            </v-card-actions>
+            <v-dialog v-model="dialog" width="500">
+              <template v-slot:activator="{ on, attrs }">
+                <v-card-actions class="justify-center">
+                  <v-btn v-bind="attrs" v-on="on" class="buttons">
+                    Delete my bets
+                  </v-btn>
+                </v-card-actions>
+              </template>
+
+              <v-card>
+                <v-card-title>
+                  Are you sure?
+                </v-card-title>
+
+                <v-card-text>
+                  This will delete all your current bets from the database. This action cannot be reversed!
+                </v-card-text>
+
+                <v-card-actions class="justify-center">
+                  <v-btn style="background-color: rgba(232,33,33,0.5);" @click="deleteAllBets(notifyDelete)">
+                    Delete
+                  </v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-dialog>
             <v-card-actions class="justify-center">
               <v-btn v-if="!showTextField" class="buttons" @click="changeName">
                 Change username
@@ -59,6 +81,7 @@ export default {
     return {
       username: "",
       numOfBets: null,
+      notifyDelete: "Successfully deleted your bets!",
       weathercoin: 0,
       showTextField: false,
       newUsername: "",
@@ -73,7 +96,7 @@ export default {
       api_key_weather: '', //gets setted from .txt file [1]
       actualTemp: 0,
       time: '',
-      //encryption/decyption
+      dialog: false,
       encryptionMethod: 'AES-256-CBC', //symmetrical method of encrypting data, which is one of the most widely used and at the same time most secure methods of encryption today
       key: Crypto.createHash('sha512').update('fd85b494-aaaa', 'utf8').digest('hex').substr(0,32), //key file must only on the corresponding data file
       iv:  Crypto.createHash('sha512').update('smslt', 'utf8').digest('hex').substr(0,16), // initialization vector (IV)
@@ -82,6 +105,7 @@ export default {
 
   methods: {
     async deleteAllBets(notification){
+      this.dialog = false;
       await fetch("/api/delete/" + this.$fire.auth.currentUser.uid, {
         method: 'DELETE'
       }).then(res => {
