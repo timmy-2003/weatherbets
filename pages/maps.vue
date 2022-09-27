@@ -35,10 +35,6 @@ export default {
       this.msg = "Your successful bets will appear on this map. Get started!"
       this.showSnackBar = true
     }
-    {
-      this.msg = "Find out more about your bets by clicking on the markers!"
-      this.showSnackBar = true;
-    }
 
   }
 

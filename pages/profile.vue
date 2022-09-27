@@ -233,7 +233,6 @@ export default {
             }
             indexArray.push(i)
           }
-          await this.updateData(); // after evaluation refresh userdata(GET request)
           await this.delay(1000)
         }
       }
@@ -278,20 +277,6 @@ export default {
       return "lat=" + lat + "&lon=" + lon;
     },
 
-    async loser(){
-      await fetch("/api/lose/" + this.$fire.auth.currentUser.uid, {
-        method: 'PUT',
-        headers:{
-          'Content-Type':'application/json'
-        },
-        body: JSON.stringify({
-          locations: [],
-          username: "loser",
-          weatherCoin: 10
-        })
-      })
-    },
-
     /*logout the user*/
     async logoutUser() {
       await this.$fire.auth.signOut()  //wait till user is logged out
@@ -321,11 +306,6 @@ export default {
         this.imageSrc = require("assets/img/expert.png")
         this.userLevel = "Expert";
       }
-      if (coins === 0){
-        this.loser();
-        this.$noty.success("Here, have some weathercoins!")
-        this.updateData();
-      }
     },
 
 
@@ -351,29 +331,11 @@ export default {
       .then(() => {
         this.msg = "Username changed successfully"
         this.showSnackBar = true;
-        this.updateData();
       })
 
-    },
-
-    //get the profile data
-    async updateData(){
-      let jsonDoc;
-      await fetch("/api/userdata/" + this.$fire.auth.currentUser.uid, { //get data from our database collection 'users'
-        method: 'GET',
-        cache: 'default'
-      })
-        .then(res => res.json())
-        .then(data => jsonDoc = data)
-      this.weathercoin = jsonDoc.weathercoin;
-      this.username = jsonDoc.username;
-      this.setBadge();
     }
-
-
   },
 
-  /* get's instantly called*/
   async created() {
     await this.setApiKey();
     // get the user data from our backend
@@ -382,13 +344,18 @@ export default {
       method: 'GET',
       cache: 'default'
     })
-
     .then(res => res.json())
     .then(data => jsonDoc = data)
     this.username = jsonDoc.username; //get back the username
     this.weathercoin = jsonDoc.weathercoin; //get back the weathercoins
     this.setBadge(); //method call setBadge to user according weathercoins
     let docRef = this.$fire.firestore.collection("/bets").doc(this.$fire.auth.currentUser.uid); //get collection from database 'bets'
+    await this.$fire.firestore.collection("users").doc(this.$fire.auth.currentUser.uid)
+      .onSnapshot(async doc => {
+        this.weathercoin = doc.data().weatherCoin;
+        this.username = doc.data().username;
+        this.setBadge();
+      })
     docRef.get().then(async (doc) => {
       if (doc.exists) {
         this.numOfBets = (await doc).data().bets.length;
