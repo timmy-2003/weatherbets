@@ -6,8 +6,7 @@
       <div class="weathercoin"> <!-- weathercoin div -->
         <h1>WEATHERCOIN</h1>
         <h2 id="randomColorHeading" v-if="$fire.auth.currentUser != null">WEATHERCOIN MINTED -> {{ this.userArray[0] }}</h2>
-        <!-- gather weathercoin that are minted with created() function -->
-        <div class="content"> <!-- content of weathercoin.vue -->
+        <div class="content">
 
           <!-- VCARD 1 -->
           <v-container fill-height>

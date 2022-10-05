@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import 'mapbox-gl/dist/mapbox-gl.css'; // important to make the markers actually visible
+import 'mapbox-gl/dist/mapbox-gl.css';
 import mapboxgl from 'mapbox-gl'
 const Crypto = require('crypto');
 import mb from 'raw-loader!@/apiKeys.txt';
@@ -51,7 +51,6 @@ export default {
         zoom: 4
       })
       let arr = await this.getArray();
-      // console.log(arr)
       for (let i = 0; i < arr.length; i++) {
         new mapboxgl.Marker()
           .setLngLat(arr[i])
@@ -64,7 +63,6 @@ export default {
       const docRef = this.$fire.firestore.collection("users").doc(this.$fire.auth.currentUser.uid);
       let document = docRef.get();
       let fbArray = (await document).get("locations")
-      // console.log(fbArray)
       for (let i = 0; i < fbArray.length; i++) {
         let geoCode = await this.locationToMapboxCode(fbArray[i]);
         arr.push(geoCode)

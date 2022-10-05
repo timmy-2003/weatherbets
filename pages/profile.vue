@@ -70,14 +70,14 @@
 </template>
 
 <script>
-import api from 'raw-loader!@/apiKeys.txt'; //gather the text from the textfile (server saved)
+import api from 'raw-loader!@/apiKeys.txt';
 const Crypto = require('crypto');
 import {arrayUnion} from "firebase/firestore"
 export default {
 
   name: "profile",
 
-  data() {  //Data is the private memory of each component where you can store any variables you need
+  data() {
     return {
       username: "",
       numOfBets: null,
@@ -90,15 +90,15 @@ export default {
       imageSrc: require("assets/img/normalUser.png"),
       userLevel: "",
       base_url: "https://api.openweathermap.org/geo/1.0/direct?",
-      api_key: '', //gets setted from .txt file [0]
+      api_key: '',
       base_url_weather: "https://api.openweathermap.org/data/3.0/onecall/timemachine?",
-      api_key_weather: '', //gets setted from .txt file [1]
+      api_key_weather: '',
       actualTemp: 0,
       time: '',
       dialog: false,
-      encryptionMethod: 'AES-256-CBC', //symmetrical method of encrypting data, which is one of the most widely used and at the same time most secure methods of encryption today
-      key: Crypto.createHash('sha512').update('fd85b494-aaaa', 'utf8').digest('hex').substr(0,32), //key file must only on the corresponding data file
-      iv:  Crypto.createHash('sha512').update('smslt', 'utf8').digest('hex').substr(0,16), // initialization vector (IV)
+      encryptionMethod: 'AES-256-CBC',
+      key: Crypto.createHash('sha512').update('fd85b494-aaaa', 'utf8').digest('hex').substr(0,32),
+      iv:  Crypto.createHash('sha512').update('smslt', 'utf8').digest('hex').substr(0,16),
     }
   },
 
@@ -128,18 +128,17 @@ export default {
       const apiArray = api.split(/\r?\n|\r|\n/g);
       let apiKey1 = apiArray[0];
       let apiKey2 = apiArray[1];
-      this.api_key=apiKey1; //set API key from txt document
+      this.api_key=apiKey1;
       this.api_key_weather=apiKey2;
-      this.api_key = this.decryptAPIKey(this.api_key, this.encryptionMethod, this.key, this.iv); //overwrite encrypted API key via decryption method
+      this.api_key = this.decryptAPIKey(this.api_key, this.encryptionMethod, this.key, this.iv);
       this.api_key_weather = this.decryptAPIKey(this.api_key_weather, this.encryptionMethod, this.key, this.iv);
     },
 
     getBetDocument() {
-      // first, check if bet document exists
-      let docRef = this.$fire.firestore.collection("/bets").doc(this.$fire.auth.currentUser.uid); //get collection from database 'bets'
+      let docRef = this.$fire.firestore.collection("/bets").doc(this.$fire.auth.currentUser.uid);
       docRef.get().then(async (doc) => {
         if (doc.exists) {
-          await this.evaluateBet(doc)  //if a bet is saved in the database then evaluate
+          await this.evaluateBet(doc)
         } else {
           this.showSnackBar = true;
           this.msg = "No bets found. Start placing some bets!"
@@ -149,7 +148,6 @@ export default {
       });
     },
 
-    //evaluate existing bets - saved on our database 'bets' collection
     async evaluateBet(doc) {
       let futureCounter = 0;
       let betArray = doc.data().bets;
@@ -158,7 +156,6 @@ export default {
         this.msg = "No bets found. Start placing some bets!"
       }
       let indexArray = [];
-      //get objects
       for (let i = 0; i < betArray.length; i++) {
         let bettedCoins = betArray[i].bettedCoins;
         let location = betArray[i].location;
@@ -168,28 +165,28 @@ export default {
         if (time > Date.now()/1000){
           futureCounter++;
         } else {
-          let coordinates = await this.locationToGeocode(location) //get coordinates
+          let coordinates = await this.locationToGeocode(location)
           let url = this.base_url_weather + coordinates + "&dt=" + time + "&units=metric&appid=" + this.api_key_weather;
           await fetch(url)
-            .then(res => res.json()) //if the request was successful go further with then and get response in .json and deserialize to use it -> we want color
+            .then(res => res.json())
             .then(res => {
-              this.actualTemp = res.data[0].temp; //get the actual temp form the API fetch
+              this.actualTemp = res.data[0].temp;
             })
 
           if (odds === 1.5){
             let tmpWeatherCoins = 0;
-            if (this.actualTemp - 1.5 <= predictedTemp && this.actualTemp + 1.5 >= predictedTemp){ //if the bet lies between the win
+            if (this.actualTemp - 1.5 <= predictedTemp && this.actualTemp + 1.5 >= predictedTemp){
               tmpWeatherCoins = bettedCoins * 1.5
               let docRef = this.$fire.firestore.collection("/users").doc(this.$fire.auth.currentUser.uid);
               let updatedWeatherCoins = this.weathercoin + tmpWeatherCoins;
-              await docRef.update({weatherCoin: updatedWeatherCoins});  //update coins
+              await docRef.update({weatherCoin: updatedWeatherCoins});
               this.$noty.success("You won " + tmpWeatherCoins + " weathercoins");
               await this.pushToArray(docRef, location)
             } else {
               tmpWeatherCoins = bettedCoins * -1;
               let updatedWeatherCoins = this.weathercoin + tmpWeatherCoins;
               let docRef = this.$fire.firestore.collection("/users").doc(this.$fire.auth.currentUser.uid);
-              await docRef.update({weatherCoin: updatedWeatherCoins});  //update coins
+              await docRef.update({weatherCoin: updatedWeatherCoins});
               this.$noty.error("You lost " + tmpWeatherCoins*-1 + " weathercoins");
               await this.delay(1500)
               this.$noty.info("Actual temperature in " + location + ": " + this.actualTemp);
@@ -198,29 +195,29 @@ export default {
 
           } else if (odds === 2){
             let tmpWeatherCoins = 0;
-            if (this.actualTemp - 1 <= predictedTemp && this.actualTemp + 1 >= predictedTemp){ //if the bet lies between the win
+            if (this.actualTemp - 1 <= predictedTemp && this.actualTemp + 1 >= predictedTemp){
               tmpWeatherCoins = bettedCoins * 2
               let docRef = this.$fire.firestore.collection("/users").doc(this.$fire.auth.currentUser.uid);
               let updatedWeatherCoins = this.weathercoin + tmpWeatherCoins;
-              await docRef.update({weatherCoin: updatedWeatherCoins});  //update coins
+              await docRef.update({weatherCoin: updatedWeatherCoins});
               this.$noty.success("You won " + tmpWeatherCoins + " weathercoins");
               await this.pushToArray(docRef, location)
             } else {
               tmpWeatherCoins = bettedCoins * -1;
               let updatedWeatherCoins = this.weathercoin + tmpWeatherCoins;
               let docRef = this.$fire.firestore.collection("/users").doc(this.$fire.auth.currentUser.uid);
-              await docRef.update({weatherCoin: updatedWeatherCoins});  //update coins
+              await docRef.update({weatherCoin: updatedWeatherCoins});
               this.$noty.error("You lost " + tmpWeatherCoins*-1 + " weathercoin");
               this.$noty.info("Actual temperature: " + this.actualTemp);
             }
             indexArray.push(i)
           } else if (odds === 3){
             let tmpWeatherCoins = 0;
-            if (this.actualTemp - 0.5 <= predictedTemp && this.actualTemp + 0.5 >= predictedTemp){ //if the bet lies between the win
+            if (this.actualTemp - 0.5 <= predictedTemp && this.actualTemp + 0.5 >= predictedTemp){
               tmpWeatherCoins = bettedCoins * 3
               let docRef = this.$fire.firestore.collection("/users").doc(this.$fire.auth.currentUser.uid);
               let updatedWeatherCoins = this.weathercoin + tmpWeatherCoins;
-              await docRef.update({weatherCoin: updatedWeatherCoins});  //update coins
+              await docRef.update({weatherCoin: updatedWeatherCoins});
               this.$noty.success("You won " + tmpWeatherCoins + " weathercoin");
               await this.pushToArray(docRef, location)
             } else {
@@ -245,7 +242,7 @@ export default {
      deleteBets(arr, indexArray){
       const docRef = this.$fire.firestore.collection("bets").doc(this.$fire.auth.currentUser.uid);
       indexArray.sort();
-       for (let i = indexArray.length -1; i >= 0; i--) // iterate through array in reverse order, so we don't mess up the indexes of the yet-to be removed items
+       for (let i = indexArray.length -1; i >= 0; i--)
          arr.splice(indexArray[i],1);
       docRef.set({
         bets: arr
@@ -264,7 +261,7 @@ export default {
       )
     },
 
-    //get location - location is query from database and get lat and lon from this
+
     async locationToGeocode(location) {
       let url = this.base_url + "q=" + location + "&appid=" + this.api_key;
       let lat, lon
@@ -277,17 +274,17 @@ export default {
       return "lat=" + lat + "&lon=" + lon;
     },
 
-    /*logout the user*/
+
     async logoutUser() {
-      await this.$fire.auth.signOut()  //wait till user is logged out
-      await this.$router.push("/") //pushes a new entry into the history stack, when the user clicks the browser back button they will be taken to the specific URL
+      await this.$fire.auth.signOut()
+      await this.$router.push("/")
     },
 
     changeName() {
       this.showTextField = true;
     },
 
-    //set badge according to your coins
+
     setBadge(){
       let coins = this.weathercoin;
       if (coins < 40){
@@ -310,7 +307,6 @@ export default {
 
 
 
-    //change username
     async saveToDatabase() {
       if (this.newUsername.length < 5) {
         this.msg = "Enter a valid username!"
@@ -318,7 +314,7 @@ export default {
         return;
       }
 
-      //change username and save it to database
+
       await fetch("/api/edit/"+this.$fire.auth.currentUser.uid, {
         method: 'PATCH',
         headers:{
@@ -338,38 +334,23 @@ export default {
 
   async created() {
     await this.setApiKey();
-    // get the user data from our backend
     let jsonDoc;
-    await fetch("/api/userdata/" + this.$fire.auth.currentUser.uid, { //get data from our database collection 'users'
+    await fetch("/api/userdata/" + this.$fire.auth.currentUser.uid, {
       method: 'GET',
       cache: 'default'
     })
     .then(res => res.json())
     .then(data => jsonDoc = data)
-    this.username = jsonDoc.username; //get back the username
-    this.weathercoin = jsonDoc.weathercoin; //get back the weathercoins
-    this.setBadge(); //method call setBadge to user according weathercoins
-    let docRef = this.$fire.firestore.collection("/bets").doc(this.$fire.auth.currentUser.uid); //get collection from database 'bets'
+    this.username = jsonDoc.username;
+    this.weathercoin = jsonDoc.weathercoin;
+    this.setBadge();
     await this.$fire.firestore.collection("users").doc(this.$fire.auth.currentUser.uid)
       .onSnapshot(async doc => {
         this.weathercoin = doc.data().weatherCoin;
         this.username = doc.data().username;
         this.setBadge();
       })
-    docRef.get().then(async (doc) => {
-      if (doc.exists) {
-        this.numOfBets = (await doc).data().bets.length;
-        if (this.numOfBets === 0){
-          this.showSnackBar = true;
-          this.msg = "No bets found. Start placing some bets!"
-        }
-      } else {
-        this.showSnackBar = true;
-        this.msg = "No bets found. Start placing some bets!"
-      }
-    }).catch((error) => {
-      console.log("Error getting document:", error);
-    });
+
 
     this.dataLoaded = true;
   },
@@ -420,7 +401,6 @@ export default {
   border-radius: 10px;
 }
 
-/* responsiveness*/
 @media screen and (max-width: 600px) {
   #card{
     width: 90%;

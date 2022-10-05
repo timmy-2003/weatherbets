@@ -2,39 +2,38 @@
 
   <v-app-bar app color="black"  height="60">
     <v-toolbar color="black" height="58">
-      <v-app-bar-nav-icon color="white" @click.stop="drawer = !drawer"></v-app-bar-nav-icon> <!-- when clicked navbardrawer get's displayed -->
+      <v-app-bar-nav-icon color="white" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
       <div class="pb-2"> <!-- image get's displayed more top -->
         <v-img max-height="60" max-width="60" :src="require('../assets/img/icon.png')"></v-img>
       </div>
       <v-toolbar-title>
-        <NuxtLink to="/" class="nuxt-link-active-underline-headline">WEATHER WETTEN</NuxtLink> <!-- link to index.vue -->
+        <NuxtLink to="/" class="nuxt-link-active-underline-headline">WEATHER WETTEN</NuxtLink>
       </v-toolbar-title>
       <v-spacer/> <!-- space to other navbar elements -->
       <v-toolbar-items class="hidden-sm-and-down">
-        <v-btn color="transparent" v-if="$fire.auth.currentUser != null"> <!-- condition if you are logged in or not -->
-          <NuxtLink to="/bet" class="nuxt-link-active-underline">BET</NuxtLink> <!-- link to bet.vue -->
+        <v-btn color="transparent" v-if="$fire.auth.currentUser != null">
+          <NuxtLink to="/bet" class="nuxt-link-active-underline">BET</NuxtLink>
         </v-btn>
         <v-btn color="black" v-if="$fire.auth.currentUser != null">
-          <nuxt-link to="/leaderboards" class="nuxt-link-active-underline">LEADERBOARDS</nuxt-link> <!-- link to leaderboards.vue -->
+          <nuxt-link to="/leaderboards" class="nuxt-link-active-underline">LEADERBOARDS</nuxt-link>
         </v-btn>
         <v-btn color="black">
-          <nuxt-link to="/weathercoin" class="nuxt-link-active-underline">WEATHERCOIN</nuxt-link> <!-- link to weathercoin.vue -->
+          <nuxt-link to="/weathercoin" class="nuxt-link-active-underline">WEATHERCOIN</nuxt-link>
         </v-btn>
         <v-btn color="black">
-          <nuxt-link to="/aboutus" class="nuxt-link-active-underline">ABOUT US</nuxt-link> <!-- link to aboutus.vue -->
+          <nuxt-link to="/aboutus" class="nuxt-link-active-underline">ABOUT US</nuxt-link>
         </v-btn>
         <v-btn color="black" v-if="$fire.auth.currentUser == null">
-          <nuxt-link to="/Login" class="nuxt-link-active-underline">LOG IN</nuxt-link> <!-- link to login.vue -->
+          <nuxt-link to="/Login" class="nuxt-link-active-underline">LOG IN</nuxt-link>
         </v-btn>
         <v-btn color="black" v-if="$fire.auth.currentUser != null">
-          <nuxt-link to="/maps" class="nuxt-link-active-underline">MAP</nuxt-link> <!-- link to profile.vue -->
+          <nuxt-link to="/maps" class="nuxt-link-active-underline">MAP</nuxt-link>
         </v-btn>
         <v-btn color="black" v-if="$fire.auth.currentUser != null">
-          <nuxt-link to="/Profile" class="nuxt-link-active-underline">PROFILE</nuxt-link> <!-- link to profile.vue -->
+          <nuxt-link to="/Profile" class="nuxt-link-active-underline">PROFILE</nuxt-link>
         </v-btn>
       </v-toolbar-items>
     </v-toolbar>
-    <!-- NAVBAR DRAWER -->
     <v-navigation-drawer
       v-model="drawer"
       absolute
@@ -60,14 +59,13 @@
         <v-list-item
           v-for="item in items"
           :key="item.title"
-          link> <!-- for each item in items list them in navbar -->
+          link>
           <v-list-item-icon>
-            <v-icon>{{ item.icon }}</v-icon> <!-- for each item in items list them in navbar as icons beside element -->
+            <v-icon>{{ item.icon }}</v-icon>
           </v-list-item-icon>
 
           <v-list-item-content>
             <v-list-item-title>
-              <!-- for each item in items list them in navbar as links when clicking onto the text-->
               <nuxt-link :to="{ path: item.link, query: { plan: 'private' }}" class="nuxt-link-active">{{
                   item.title
                 }}
@@ -83,22 +81,20 @@
 
 <script>
 export default {
-  data() { //Data is the private memory of each component where you can store any variables you need
-    // if logged in display this sort of navbar elements
+  data() {
     if (this.$fire.auth.currentUser != null) {
       return {
         drawer: null,
         items: [
           {title: 'BET', icon: 'mdi-dice-6', link: 'bet'},
           {title: 'LEADERBOARDS', icon: 'mdi-chart-bar', link: 'leaderboards'},
-          {title: 'WEATHERCOIN', icon: 'mdi-currency-btc', link: 'weathercoin'},
+          {title: 'WEATHERCOIN', icon: 'mdi-bitcoin', link: 'weathercoin'},
           {title: 'ABOUT US', icon: 'mdi-account-multiple', link: 'aboutus'},
-          {title: 'MAP', icon: "mdi-dice-6", link: 'maps'},
-          {title: 'PROFILE', icon: "mdi-emoticon-cool", link: 'Profile'}
+          {title: 'MAP', icon: "mdi-map", link: 'maps'},
+          {title: 'PROFILE', icon: "mdi-account", link: 'Profile'}
         ],
       }
     }
-    // if not logged in display this sort of navbar elements
     else {
       return {
         drawer: null,
@@ -114,17 +110,17 @@ export default {
 </script>
 
 <style>
-/* standard nuxt link for navbar-drawer*/
+
 .nuxt-link-active {
   font-weight: bold;
   text-decoration: none;
 }
-/* nuxt link for standard navbar at top*/
+
 .nuxt-link-active-underline {
   font-weight: bold;
   text-decoration: none;
 }
-/* nuxt link for standard navbar at top hovering*/
+
 .nuxt-link-active-underline:after {
   bottom: -5px;
   content: "";
@@ -136,12 +132,10 @@ export default {
   transition: width 0.3s ease 0s, left 0.3s ease 0s;
   width: 0;
 }
-/* nuxt link for standard navbar at top hovering*/
 .nuxt-link-active-underline:hover:after {
-  width: 100%; /* fill width */
-  left: 0; /* start left */
+  width: 100%;
+  left: 0;
 }
-/* nuxt link for headline of navbar hovering*/
 .nuxt-link-active-underline-headline:after {
   bottom: -5px;
   content: "";
@@ -152,12 +146,10 @@ export default {
   transition: width 0.3s ease 0s, left 0.3s ease 0s;
   width: 0;
 }
-/* nuxt link for headline of navbar hovering*/
 .nuxt-link-active-underline-headline:hover:after {
-  width: 115%; /* fill whole width */
-  left: -15px; /* start more left */
+  width: 115%;
+  left: -15px;
 }
-/* nuxt link for headline of navbarDrawer*/
 .nuxt-link-active-underline-headline-navbarDrawer{
   color: #fff;
   text-transform: uppercase;
@@ -168,7 +160,7 @@ export default {
   position: relative;
   font-size: 1rem;
 }
-/* nuxt link for headline of navbarDrawer hovering*/
+
 .nuxt-link-active-underline-headline-navbarDrawer:after {
   bottom: 0;
   content: "";
@@ -180,9 +172,9 @@ export default {
   transition: width 0.3s ease 0s, left 0.3s ease 0s;
   width: 0;
 }
-/* nuxt link for headline of navbarDrawer hovering*/
+
 .nuxt-link-active-underline-headline-navbarDrawer:hover:after {
-  width: 100%; /* fill width */
-  left: 0; /* start left*/
+  width: 100%;
+  left: 0;
 }
 </style>

@@ -36,13 +36,13 @@ export default {
       }
       return res;
     })
-      .then(response => response.json()) //get response in .json and deserialize to set data as a userarray
+      .then(response => response.json())
       .then(data => this.usersLocations = data)
   }
 }
 </script>
 
-<style scoped> /* scoped = apply to elements of the current component only */
+<style scoped>
 .tableData{
   text-align: center;
 }

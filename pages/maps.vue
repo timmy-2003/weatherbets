@@ -1,5 +1,5 @@
 <template>
-<v-app>
+<v-app id="background">
   <NavBar>
 
   </NavBar>
@@ -29,7 +29,6 @@ export default {
     const docRef = this.$fire.firestore.collection("users").doc(this.$fire.auth.currentUser.uid);
     let document = docRef.get();
     let locations = (await document).get("locations")
-    // console.log(locations)
     this.bets = locations.length;
     if (this.bets === 0){
       this.msg = "Your successful bets will appear on this map. Get started!"
@@ -45,6 +44,10 @@ export default {
 <style>
 .mapboxgl-ctrl-attrib-inner{
   display: none;
+}
+
+#background{
+  background: #2d2d2d;
 }
 
 </style>

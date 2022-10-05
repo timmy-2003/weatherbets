@@ -15,9 +15,9 @@
 
       <v-card v-if="showBetCard" class="mx-auto" max-width="400" max-height="1000" loading loader-height="1" outlined shaped>
         <v-card-title primary-title class="justify-center">PLACE YOUR BET</v-card-title>
-        <v-text-field id="txtFieldTemperature" class="txtField" v-model="predictedTemp" :rules="validateTemp"
+        <v-text-field prepend-icon="mdi-thermometer" id="txtFieldTemperature" class="txtField" v-model="predictedTemp" :rules="validateTemp"
                       label="temperature"></v-text-field>
-        <v-text-field id="txtFieldAmount" class="txtField" v-model="bettedCoins" :rules="validateCoins"
+        <v-text-field prepend-icon="mdi-bitcoin" id="txtFieldAmount" class="txtField" v-model="bettedCoins" :rules="validateCoins"
                       label="weathercoin"></v-text-field>
         <input id="timePicker" style="color: white; font-size: 18px; background-color: #364848; border-radius: 4px"
                type="datetime-local" max="2022-12-31T00:00" value="2022-09-01T00:00">
